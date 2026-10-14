@@ -340,8 +340,8 @@ const SPRITE_FILES = {
     peach:    { file: 'img/peach.png',    jump: 'img/peach-pulo.png',    facesRight: true, height: 40 },
     toad:     { file: 'img/toad.png',     jump: 'img/toad-pulo.png',     facesRight: true, height: 32 },
     yoshi:    { file: 'img/yoshi.png',    jump: 'img/yoshi-pulo.png',    facesRight: true, height: 40 },
-    bowser:   { file: 'img/bowser.png',   jump: 'img/bowser-pulo.png',   facesRight: true, height: 46 },
-    rosalina: { file: 'img/rosalina.png', jump: 'img/rosalina-pulo.png', facesRight: true, height: 42 },
+    bowser:   { file: 'img/bowser.png',   jump: 'img/bowser-pulo.png',   facesRight: false, height: 52 },
+    rosalina: { file: 'img/rosalina.png', jump: 'img/rosalina-pulo.png', facesRight: true, height: 44 },
     dk:       { file: 'img/dk.png',       jump: 'img/dk-pulo.png',       facesRight: true, height: 44 }
 };
 const loadedImages = {};
