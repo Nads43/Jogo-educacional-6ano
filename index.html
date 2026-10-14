@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="theme-color" content="#E52521">
+    <meta name="description" content="Jogo educativo de matemática para o 6º ano: suba a montanha acertando as contas!">
+    <title>Super Mario Math Climb - 6º Ano</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body data-light="dia">
+
+    <!-- CABEÇALHO DA PÁGINA -->
+    <header class="site-header">
+        <span class="site-logo" aria-hidden="true">🍄</span>
+        <h1 class="site-title">Super Mario Math Climb</h1>
+        <span class="site-tag">Matemática • 6º ano</span>
+    </header>
+
+    <!-- ÁREA DO JOGO (o JavaScript ajusta o tamanho para caber na tela) -->
+    <main id="stage">
+        <div id="game-container">
+
+            <!-- TELA INICIAL -->
+            <section id="start-screen" class="overlay-screen" aria-label="Tela inicial">
+                <h2 class="pixel-title">SUPER MARIO MATH CLIMB</h2>
+                <p class="subtitle">Desafio de Matemática - 6º Ano</p>
+
+                <div class="options-row">
+                    <div class="option-box">
+                        <h3 class="option-title">🧮 DIFICULDADE DAS CONTAS</h3>
+                        <div class="choice-row" id="difficulty-choices"></div>
+                        <p class="option-hint" id="difficulty-hint"></p>
+                    </div>
+                    <div class="option-box">
+                        <h3 class="option-title">💡 LUZ DE FUNDO</h3>
+                        <div class="choice-row" id="light-choices"></div>
+                        <p class="option-hint" id="light-hint"></p>
+                    </div>
+                </div>
+
+                <div class="controls-guide">
+                    <div class="player-card p1-card">
+                        <canvas class="preview" id="preview-p1" width="40" height="48"></canvas>
+                        <div class="player-info">
+                            <h3 id="p1-card-name">MARIO</h3>
+                            <p class="player-tag">JOGADOR 1</p>
+                            <p><span class="keycap">A</span><span class="keycap">D</span> andar</p>
+                            <p><span class="keycap">W</span> pular</p>
+                        </div>
+                    </div>
+                    <div class="vs">VS</div>
+                    <div class="player-card p2-card">
+                        <canvas class="preview" id="preview-p2" width="40" height="48"></canvas>
+                        <div class="player-info">
+                            <h3 id="p2-card-name">LUIGI</h3>
+                            <p class="player-tag" id="p2-tag">JOGADOR 2</p>
+                            <p class="p2-keys"><span class="keycap">&#8592;</span><span class="keycap">&#8594;</span> andar</p>
+                            <p class="p2-keys"><span class="keycap">&#8593;</span> pular</p>
+                            <!-- quem controla o jogador 2: um amigo ou o computador -->
+                            <div class="mode-row" id="mode-choices">
+                                <button class="mode-btn" data-mode="duo">👤 AMIGO</button>
+                                <button class="mode-btn" data-mode="cpu">🤖 CPU</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="btn-row">
+                    <button id="chars-btn" class="pixel-btn alt">👥 PERSONAGENS</button>
+                    <button id="start-btn" class="pixel-btn">▶ INICIAR JOGO</button>
+                    <button id="fullscreen-btn" class="pixel-btn alt touch-only">TELA CHEIA</button>
+                </div>
+
+                <ul class="rule-notice">
+                    <li>☁️ Pule na nuvem com a resposta certa para subir a montanha.</li>
+                    <li>❤️ Resposta errada perde 1 vida e mostra a conta certa (3 vidas no total).</li>
+                    <li>📖 Abra 5 níveis de vantagem e o LIVRO DE FATALITY é seu!</li>
+                </ul>
+            </section>
+
+            <!-- TELA DE SELEÇÃO DE PERSONAGENS -->
+            <section id="char-screen" class="overlay-screen hidden" aria-label="Seleção de personagens">
+                <h2 class="pixel-title">ESCOLHA SEU PERSONAGEM</h2>
+                <div class="pick-tabs">
+                    <button class="pick-tab p1" data-slot="p1">P1: <span id="pick-p1-name">MARIO</span></button>
+                    <button class="pick-tab p2" data-slot="p2">P2: <span id="pick-p2-name">LUIGI</span></button>
+                </div>
+                <div class="char-grid" id="char-grid"></div>
+                <p class="option-hint">Clique no jogador (P1 ou P2) e depois no personagem.</p>
+                <button id="chars-ok-btn" class="pixel-btn">✔ PRONTO!</button>
+            </section>
+
+            <!-- TELA DE FIM DE JOGO -->
+            <section id="game-over-screen" class="overlay-screen hidden" aria-label="Fim de jogo">
+                <h2 id="winner-title" class="pixel-title">MARIO VENCEU!</h2>
+                <p id="winner-reason" class="subtitle">Alcançou a vitória na montanha!</p>
+                <!-- acertos, erros e contas para revisar (preenchido pelo JavaScript) -->
+                <div id="stats" class="stats"></div>
+                <div class="btn-row">
+                    <button id="menu-btn" class="pixel-btn alt">☰ MENU</button>
+                    <button id="restart-btn" class="pixel-btn">↻ JOGAR NOVAMENTE</button>
+                </div>
+            </section>
+
+            <!-- TELA DE PAUSA -->
+            <section id="pause-screen" class="overlay-screen hidden" aria-label="Jogo pausado">
+                <h2 class="pixel-title">⏸ PAUSADO</h2>
+                <p class="subtitle">Aperte P ou Esc para continuar</p>
+                <div class="btn-row">
+                    <button id="pause-menu-btn" class="pixel-btn alt">☰ MENU</button>
+                    <button id="resume-btn" class="pixel-btn">▶ CONTINUAR</button>
+                </div>
+            </section>
+
+            <!-- BOTÕES DE SOM E PAUSA (sempre no topo, no meio da tela) -->
+            <div id="game-tools">
+                <button id="sound-btn" class="tool-btn" aria-label="Ligar ou desligar o som">🔊</button>
+                <button id="pause-btn" class="tool-btn" aria-label="Pausar o jogo">⏸</button>
+            </div>
+
+            <!-- LIVRO DE FATALITY -->
+            <section id="fatality-book" class="overlay-screen hidden" aria-label="Livro de Fatality">
+                <div class="book" id="book">
+                    <div class="book-page book-left">
+                        <h2 class="book-title">&#9760; LIVRO DE FATALITY &#9760;</h2>
+                        <p id="book-who" class="book-who"></p>
+                        <div id="book-col-left"></div>
+                    </div>
+                    <div class="book-spine"></div>
+                    <div class="book-page book-right">
+                        <div id="book-col-right"></div>
+                        <!-- setas na tela para digitar a sequência no celular -->
+                        <div class="book-pad touch-only" id="book-pad">
+                            <button class="bpad up" data-dir="U" aria-label="Cima">▲</button>
+                            <button class="bpad left" data-dir="L" aria-label="Esquerda">◀</button>
+                            <button class="bpad down" data-dir="D" aria-label="Baixo">▼</button>
+                            <button class="bpad right" data-dir="R" aria-label="Direita">▶</button>
+                        </div>
+                        <div class="book-timer">
+                            <span>TEMPO: <b id="book-time">20</b>s</span>
+                            <div class="book-bar"><div id="book-bar-fill"></div></div>
+                            <p class="book-hint">Errou a tecla? A sequência recomeça.<br>Acabou o tempo? O livro escolhe por você!</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- NOME DO FATALITY (aparece no meio da tela depois da cena) -->
+            <div id="fatality-name" class="hidden">
+                <div class="fatality-label">FATALITY</div>
+                <div id="fatality-title" class="fatality-title"></div>
+            </div>
+
+            <!-- DIVISÃO DE TELA DOS JOGADORES -->
+            <div id="viewports-container">
+                <section class="player-viewport" id="viewport-p1" aria-label="Tela do jogador 1">
+                    <div class="hud">
+                        <span class="hud-name" id="p1-hud-name">MARIO</span>
+                        <span class="hud-level" id="p1-lvl">Nível: 0</span>
+                        <div class="hud-lives" id="p1-lives">❤❤❤</div>
+                    </div>
+                    <canvas id="canvas-p1"></canvas>
+                    <!-- botões de toque do jogador 1 (só aparecem no celular/tablet) -->
+                    <div class="touch-pad">
+                        <div class="tgroup">
+                            <button class="tbtn" data-key="KeyA" aria-label="P1 esquerda">◀</button>
+                            <button class="tbtn" data-key="KeyD" aria-label="P1 direita">▶</button>
+                        </div>
+                        <button class="tbtn jump" data-key="KeyW" aria-label="P1 pular">▲</button>
+                    </div>
+                </section>
+
+                <section class="player-viewport" id="viewport-p2" aria-label="Tela do jogador 2">
+                    <div class="hud">
+                        <span class="hud-name" id="p2-hud-name">LUIGI</span>
+                        <span class="hud-level" id="p2-lvl">Nível: 0</span>
+                        <div class="hud-lives" id="p2-lives">❤❤❤</div>
+                    </div>
+                    <canvas id="canvas-p2"></canvas>
+                    <!-- botões de toque do jogador 2 -->
+                    <div class="touch-pad">
+                        <div class="tgroup">
+                            <button class="tbtn" data-key="ArrowLeft" aria-label="P2 esquerda">◀</button>
+                            <button class="tbtn" data-key="ArrowRight" aria-label="P2 direita">▶</button>
+                        </div>
+                        <button class="tbtn jump" data-key="ArrowUp" aria-label="P2 pular">▲</button>
+                    </div>
+                </section>
+            </div>
+        </div>
+    </main>
+
+    <!-- AVISO PARA GIRAR O CELULAR (só aparece no celular em pé) -->
+    <div id="rotate-hint">
+        <div class="rotate-icon" aria-hidden="true">📱</div>
+        <p>Gire o celular para jogar deitado!</p>
+        <button id="rotate-ok-btn" class="pixel-btn alt">JOGAR ASSIM MESMO</button>
+    </div>
+
+    <!-- RODAPÉ -->
+    <footer class="site-footer">
+        Projeto escolar feito com HTML, CSS e JavaScript • 2 jogadores no mesmo teclado ou celular<br>
+        Personagens Super Mario © Nintendo • uso educativo, sem fins lucrativos
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>
